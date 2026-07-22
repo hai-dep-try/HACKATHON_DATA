@@ -2,6 +2,30 @@
 
 Nhật ký append-only, mục mới đặt ngay dưới phần hướng dẫn này.
 
+## TASK-20260722-009 — 2026-07-22T14:29:27Z — Codex / GPT-5
+
+- **Trạng thái:** DONE
+- **Mục tiêu:** Lưu raw snapshot theo content hash để pipeline idempotent và có thể tái xử lý.
+- **Đã thay đổi:** `agents/scraper/raw_store.py`, `agents/scraper/__init__.py`, `tests/unit/test_raw_store.py`, `README.md`, `coordination/**`.
+- **Hành vi/API/schema:** `RawSnapshotStore.save()` ghi JSON một lần bằng exclusive create; `load()` chống path traversal và xác minh schema/source/hash.
+- **Kiểm tra:** Ruff lint/format đạt; mypy strict đạt; pytest 25 passed.
+- **Blocker/rủi ro:** Local filesystem store phù hợp MVP một máy; khi chạy nhiều worker cần object storage hoặc database-backed locking.
+- **Việc tiếp theo:** Gemini thực hiện `TASK-20260722-008`; sau đó nối fetch → snapshot → extract thành pipeline command.
+
+---
+
+## TASK-20260722-007 — 2026-07-22T14:27:09Z — Codex / GPT-5
+
+- **Trạng thái:** DONE
+- **Mục tiêu:** Đưa dự án lên repository GitHub do người dùng cung cấp.
+- **Đã thay đổi:** Khởi tạo remote `origin` và tracking branch `main`.
+- **Hành vi/API/schema:** Không đổi mã nguồn.
+- **Kiểm tra:** Push commit `d090c2a` thành công tới `hai-dep-try/HACKATHON_DATA`.
+- **Blocker/rủi ro:** Không có.
+- **Việc tiếp theo:** Codex làm `TASK-20260722-009`; Gemini có thể làm song song `TASK-20260722-008`.
+
+---
+
 ## TASK-20260722-006 — 2026-07-22T14:23:48Z — Codex / GPT-5
 
 - **Trạng thái:** DONE

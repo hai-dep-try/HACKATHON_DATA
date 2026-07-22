@@ -86,6 +86,8 @@ Source mới phải được khai báo theo mẫu [sources.example.json](config/
 
 `HttpScraper` chỉ lấy HTML từ source đã bật, URL nằm trong allowlist và được `robots.txt` cho phép. Nó trả `RawDocument`; extractor sau đó chuyển tiếp thành `OpportunityRecord`.
 
+`RawSnapshotStore` lưu snapshot theo `data/raw/<source_id>/<content_hash>.json`. Cùng một nội dung chỉ được tạo một lần; khi đọc lại, schema, source ID và hash đều được xác minh.
+
 Smoke-test một source thật mà không lưu raw HTML:
 
 ```powershell
