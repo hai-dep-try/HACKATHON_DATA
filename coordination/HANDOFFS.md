@@ -2,6 +2,30 @@
 
 Nhật ký append-only, mục mới đặt ngay dưới phần hướng dẫn này.
 
+## TASK-20260722-010 — 2026-07-22T14:34:14Z — Codex / GPT-5
+
+- **Trạng thái:** DONE
+- **Mục tiêu:** Review và tích hợp thay đổi extractor từ Gemini.
+- **Đã thay đổi:** `agents/extractor/core.py`, `tests/unit/test_extractor.py`, `agents/prompts/opportunity_extraction.md`, `coordination/**`.
+- **Hành vi/API/schema:** Deadline thiếu năm chỉ dùng năm từ metadata xuất bản; không dùng năm crawl. Học bổng có compensation nhưng không tự đồng nghĩa `paid=True`.
+- **Kiểm tra:** Ruff lint/format đạt; mypy strict đạt; pytest 27 passed.
+- **Blocker/rủi ro:** Regex vẫn chỉ bao phủ một số cách diễn đạt; cần LLM fallback có schema validation ở giai đoạn sau.
+- **Việc tiếp theo:** Ghép fetch → snapshot → extract thành pipeline command.
+
+---
+
+## TASK-20260722-008 — 2026-07-22T14:32:00Z — Gemini / 3.1 Pro (Low)
+
+- **Trạng thái:** DONE
+- **Mục tiêu:** Nâng cấp deterministic extractor để lấy thêm deadline, technologies, eligibility và compensation từ dữ liệu có bằng chứng rõ ràng (đặc biệt cho case VnExpress/FPT).
+- **Đã thay đổi:** `agents/extractor/core.py`, `tests/unit/test_extractor.py`, `agents/prompts/opportunity_extraction.md`, `coordination/BOARD.md`, `coordination/HANDOFFS.md`.
+- **Hành vi/API/schema:** `extract_opportunity` được bổ sung Regex parsing để lấy deadline (datetime timezone-aware), technologies (chuẩn hóa), eligibility_text và compensation_text. 
+- **Kiểm tra:** `ruff check . --fix`, `mypy agents backend`, `pytest` passed 100%. Thêm test `test_article_classifies_fpt_futuretech_scenario`.
+- **Blocker/rủi ro:** Giới hạn của Parser: Hiện tại vẫn dựa vào Regex nên độ chính xác bị hạn chế bởi cách viết văn bản (như định dạng ngày, hoặc từ khóa); những trường hợp văn bản viết khác chuẩn sẽ trả về None. LLM extraction vẫn cần thiết cho các trang phức tạp.
+- **Việc tiếp theo:** Tích hợp logic fallback sử dụng LLM khi các trường lấy deterministically trả về None.
+
+---
+
 ## TASK-20260722-009 — 2026-07-22T14:29:27Z — Codex / GPT-5
 
 - **Trạng thái:** DONE

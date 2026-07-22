@@ -189,3 +189,67 @@ def test_article_classifies_talent_program_from_explicit_evidence():
     assert record.experience_level is ExperienceLevel.STUDENT
     assert record.target_audiences == ["university_student"]
     assert str(record.application_url) == "https://apply.example.org/form"
+
+
+def test_article_classifies_fpt_futuretech_scenario():
+    source = SourceDefinition(
+        id="fpt-source",
+        name="FPT Source",
+        kind=SourceKind.HTML,
+        base_url=HttpUrl("https://fpt.example.com"),
+        discovery_urls=[HttpUrl("https://fpt.example.com/news")],
+        allowed_domains=["fpt.example.com"],
+        opportunity_types={OpportunityType.TALENT_PROGRAM},
+        enabled=True,
+    )
+    html = """
+    <html>
+      <head>
+        <title>FPT FutureTech Talents 2026</title>
+        <meta property="article:published_time" content="2026-03-26T17:00:00+07:00">
+      </head>
+      <body>
+        <h1>FPT FutureTech Talents</h1>
+        <p>Đây là chương trình tài năng.</p>
+        <p>Thời gian nhận hồ sơ là từ ngày 26/3 đến ngày 15/8.</p>
+        <p>Đối tượng: Sinh viên năm 3-5 các trường đại học công nghệ.</p>
+        <p>Quyền lợi: Nhận học bổng trị giá 50 triệu VNĐ.</p>
+        <p>Chương trình tập trung vào các công nghệ AI, Cloud,
+        Cyber Security và Điện toán lượng tử (Quantum).</p>
+      </body>
+    </html>
+    """
+    doc = RawDocument.from_text(
+        source_id="fpt-source",
+        url="https://fpt.example.com/talent",
+        fetched_at=datetime(2026, 1, 1, 12, 0, 0, tzinfo=UTC),
+        status_code=200,
+        content_type="text/html",
+        text=html,
+    )
+
+    record = extract_opportunity(doc, source)
+
+    assert record.title == "FPT FutureTech Talents 2026"
+    assert record.opportunity_type is OpportunityType.TALENT_PROGRAM
+    # deadline parsed to 2026-08-15 23:59:59
+    assert record.registration_deadline == datetime(2026, 8, 15, 23, 59, 59, tzinfo=UTC)
+    assert set(record.technologies) == {"AI", "Cloud", "Cyber Security", "Quantum"}
+    assert record.eligibility_text == "Sinh viên năm 3-5 các trường đại học công nghệ"
+    assert record.compensation_text == "Nhận học bổng trị giá 50 triệu VNĐ"
+    assert record.paid is None
+
+
+def test_deadline_without_year_or_publication_metadata_stays_unknown(mock_source):
+    doc = RawDocument.from_text(
+        source_id="test_source",
+        url="https://example.com/internship",
+        fetched_at=datetime(2026, 1, 1, tzinfo=UTC),
+        status_code=200,
+        content_type="text/html",
+        text="<html><title>Internship</title><p>Hạn đăng ký: 15/08.</p></html>",
+    )
+
+    record = extract_opportunity(doc, mock_source)
+
+    assert record.registration_deadline is None

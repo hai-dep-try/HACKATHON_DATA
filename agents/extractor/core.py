@@ -1,6 +1,8 @@
 """Deterministic extraction from RawDocument to OpportunityRecord."""
 
 import json
+import re
+from datetime import UTC, datetime
 from typing import Any
 
 from bs4 import BeautifulSoup
@@ -72,6 +74,86 @@ def _extract_application_url(soup: BeautifulSoup) -> str | None:
     return None
 
 
+def _extract_published_at(soup: BeautifulSoup) -> datetime | None:
+    """Read article publication time from explicit page metadata."""
+
+    meta = soup.find("meta", property="article:published_time")
+    value = meta.get("content") if meta else None
+    if not isinstance(value, str):
+        return None
+    try:
+        published_at = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return published_at if published_at.tzinfo is not None else published_at.replace(tzinfo=UTC)
+
+
+def _extract_deadline(text: str, published_at: datetime | None) -> datetime | None:
+    """Parse an explicit deadline, using publication year only when needed."""
+
+    match = re.search(
+        r"(?i)(?:hạn đăng ký|đăng ký đến|deadline|"
+        r"nhận hồ sơ[^.]{0,100}?đến(?: ngày)?)[:\s]*(\d{1,2})[-/](\d{1,2})"
+        r"(?:[-/](\d{4}))?",
+        text,
+    )
+    if match:
+        explicit_year = int(match.group(3)) if match.group(3) else None
+        year = explicit_year or (published_at.year if published_at else None)
+        if year is None:
+            return None
+        try:
+            return datetime(year, int(match.group(2)), int(match.group(1)), 23, 59, 59, tzinfo=UTC)
+        except ValueError:
+            return None
+    return None
+
+
+def _extract_technologies(text: str) -> list[str]:
+    """Extract standard technologies mentioned in text."""
+    techs = []
+    # Using word boundaries to avoid partial matches, though for some we just check presence
+    if re.search(r"\bAI\b|\bTrí tuệ nhân tạo\b", text, re.IGNORECASE):
+        techs.append("AI")
+    if re.search(r"\bCloud\b|\bĐiện toán đám mây\b", text, re.IGNORECASE):
+        techs.append("Cloud")
+    if re.search(r"\bCyber\s*Security\b|\bAn toàn thông tin\b|\bBảo mật\b", text, re.IGNORECASE):
+        techs.append("Cyber Security")
+    if re.search(r"\bQuantum\b|\bLượng tử\b", text, re.IGNORECASE):
+        techs.append("Quantum")
+    return techs
+
+
+def _extract_eligibility(text: str) -> str | None:
+    """Extract short eligibility sentence."""
+    match = re.search(
+        r"(?i)(?:đối tượng|điều kiện|yêu cầu)[^\.:\n]*[:]*\s*([^\.\n]*(?:sinh viên)[^\.\n]*)\.",
+        text,
+    )  # noqa: E501
+    if match:
+        return match.group(1).strip()
+    return None
+
+
+def _extract_compensation(text: str) -> tuple[str | None, bool | None]:
+    """Extract compensation text and paid boolean."""
+    match = re.search(
+        r"(?i)(?:quyền lợi|học bổng|trợ cấp)[^\.:\n]*[:]*\s*"
+        r"([^\.\n]*(?:triệu|vnd|usd|học bổng|trợ cấp|lương)[^\.\n]*)\.",
+        text,
+    )
+    if match:
+        comp_text = match.group(1).strip()
+        if re.search(r"(?i)không lương|unpaid", comp_text):
+            is_paid: bool | None = False
+        elif re.search(r"(?i)trợ cấp|lương|salary|stipend", comp_text):
+            is_paid = True
+        else:
+            is_paid = None
+        return comp_text, is_paid
+    return None, None
+
+
 def extract_opportunity(doc: RawDocument, source: SourceDefinition) -> OpportunityRecord:
     """Extract structured data from a RawDocument deterministically."""
     if doc.source_id != source.id:
@@ -114,7 +196,13 @@ def extract_opportunity(doc: RawDocument, source: SourceDefinition) -> Opportuni
     application_url = _extract_application_url(soup)
     mentions_students = "sinh viên" in page_text.lower() or "student" in page_text.lower()
 
-    # 3. HTML Minimal Fallback
+    # 3. New extractions
+    deadline = _extract_deadline(page_text, _extract_published_at(soup))
+    technologies = _extract_technologies(page_text)
+    eligibility_text = _extract_eligibility(page_text)
+    compensation_text, is_paid = _extract_compensation(page_text)
+
+    # 4. HTML Minimal Fallback
     if not title:
         if soup.title and soup.title.string:
             title = soup.title.string
@@ -140,6 +228,11 @@ def extract_opportunity(doc: RawDocument, source: SourceDefinition) -> Opportuni
         experience_level=(
             ExperienceLevel.STUDENT if mentions_students else ExperienceLevel.NOT_SPECIFIED
         ),
+        registration_deadline=deadline,
+        technologies=technologies,
+        eligibility_text=eligibility_text,
+        compensation_text=compensation_text,
+        paid=is_paid,
         content_hash=doc.content_hash,
         scraped_at=doc.fetched_at,
     )
