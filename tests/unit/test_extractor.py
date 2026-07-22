@@ -253,3 +253,22 @@ def test_deadline_without_year_or_publication_metadata_stays_unknown(mock_source
     record = extract_opportunity(doc, mock_source)
 
     assert record.registration_deadline is None
+
+
+def test_itemprop_publication_metadata_supplies_deadline_year(mock_source):
+    doc = RawDocument.from_text(
+        source_id="test_source",
+        url="https://example.com/internship",
+        fetched_at=datetime(2027, 1, 1, tzinfo=UTC),
+        status_code=200,
+        content_type="text/html",
+        text=(
+            '<html><head><meta itemprop="datePublished" '
+            'content="2026-03-26T17:00:00+07:00"><title>Internship</title></head>'
+            "<body><p>Thời gian nhận hồ sơ từ ngày 26/3 đến ngày 10/4.</p></body></html>"
+        ),
+    )
+
+    record = extract_opportunity(doc, mock_source)
+
+    assert record.registration_deadline == datetime(2026, 4, 10, 23, 59, 59, tzinfo=UTC)

@@ -78,6 +78,8 @@ def _extract_published_at(soup: BeautifulSoup) -> datetime | None:
     """Read article publication time from explicit page metadata."""
 
     meta = soup.find("meta", property="article:published_time")
+    if meta is None:
+        meta = soup.find("meta", attrs={"itemprop": "datePublished"})
     value = meta.get("content") if meta else None
     if not isinstance(value, str):
         return None

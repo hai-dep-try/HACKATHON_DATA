@@ -94,6 +94,14 @@ Smoke-test một source thật mà không lưu raw HTML:
 .\.venv\Scripts\python.exe scripts\smoke_source.py --source vnexpress-education
 ```
 
+Chạy pipeline MVP đầy đủ cho tất cả source đang bật:
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_pipeline.py
+```
+
+Lệnh này tải discovery page, lưu raw snapshot idempotent và trả JSON `OpportunityRecord`. Có thể giới hạn một source bằng `--source <source-id>`.
+
 ## Làm việc với nhiều AI
 
 Codex, Gemini, Claude hoặc người phát triển đều dùng cùng một quy trình trong
