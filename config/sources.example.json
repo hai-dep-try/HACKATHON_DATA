@@ -1,0 +1,46 @@
+{
+  "schema_version": "1.0.0",
+  "sources": [
+    {
+      "id": "example-hackathons",
+      "name": "Example Hackathon Source",
+      "kind": "html",
+      "base_url": "https://events.example.com/",
+      "discovery_urls": [
+        "https://events.example.com/hackathons"
+      ],
+      "allowed_domains": [
+        "events.example.com"
+      ],
+      "opportunity_types": [
+        "hackathon",
+        "competition"
+      ],
+      "enabled": false,
+      "requests_per_minute": 10,
+      "max_concurrency": 1,
+      "respect_robots_txt": true
+    },
+    {
+      "id": "example-careers",
+      "name": "Example Company Careers",
+      "kind": "html",
+      "base_url": "https://careers.example.org/",
+      "discovery_urls": [
+        "https://careers.example.org/students"
+      ],
+      "allowed_domains": [
+        "careers.example.org"
+      ],
+      "opportunity_types": [
+        "internship",
+        "talent_program",
+        "trainee_program"
+      ],
+      "enabled": false,
+      "requests_per_minute": 6,
+      "max_concurrency": 1,
+      "respect_robots_txt": true
+    }
+  ]
+}

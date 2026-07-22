@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "sources": [
+    {
+      "id": "vnexpress-education",
+      "name": "VnExpress Giáo dục",
+      "kind": "html",
+      "base_url": "https://vnexpress.net/",
+      "discovery_urls": [
+        "https://vnexpress.net/fpt-khoi-dong-chuong-trinh-uom-mam-tai-nang-cong-nghe-tre-mua-3-5055223.html"
+      ],
+      "allowed_domains": [
+        "vnexpress.net"
+      ],
+      "opportunity_types": [
+        "internship",
+        "talent_program",
+        "scholarship"
+      ],
+      "enabled": true,
+      "requests_per_minute": 6,
+      "max_concurrency": 1,
+      "respect_robots_txt": true
+    }
+  ]
+}
