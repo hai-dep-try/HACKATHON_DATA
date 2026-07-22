@@ -2,6 +2,44 @@
 
 Nhật ký append-only, mục mới đặt ngay dưới phần hướng dẫn này.
 
+## TASK-20260722-013 — 2026-07-22T14:38:42Z — Codex / GPT-5
+
+- **Trạng thái:** DONE
+- **Mục tiêu:** Review và tích hợp API opportunity do Gemini xây dựng.
+- **Đã thay đổi:** Review `backend/**`, format `tests/unit/test_api.py`, cập nhật `coordination/**`.
+- **Hành vi/API/schema:** Xác nhận repository được inject; API hỗ trợ list/filter và lookup theo content hash với 404 chuẩn.
+- **Kiểm tra:** Ruff lint đạt; mypy strict đạt; pytest toàn bộ 36 passed; format đạt sau khi chuẩn hóa test API.
+- **Blocker/rủi ro:** Repository mặc định là in-memory, chưa nhận record từ pipeline và mất dữ liệu khi restart.
+- **Việc tiếp theo:** Thêm canonical content hash và processed repository persistence trước khi nối pipeline vào API.
+
+---
+
+## TASK-20260722-011 — 2026-07-22T14:37:41Z — Codex / GPT-5
+
+- **Trạng thái:** DONE
+- **Mục tiêu:** Ghép fetch → raw snapshot → deterministic extract thành một pipeline command.
+- **Đã thay đổi:** `agents/pipeline/**`, `scripts/run_pipeline.py`, `tests/unit/test_pipeline.py`, `agents/extractor/core.py`, `tests/unit/test_extractor.py`, `README.md`, `coordination/**`.
+- **Hành vi/API/schema:** `PipelineRunner` xử lý discovery pages và trả `PipelineItem`; CLI chạy source đã bật. Bổ sung đọc năm xuất bản từ `itemprop=datePublished` để parse deadline bài VnExpress.
+- **Kiểm tra:** Test phạm vi Codex 15 passed; Ruff và mypy đạt. Live pipeline lấy deadline `2026-04-10`, bốn technologies và application URL.
+- **Blocker/rủi ro:** HTML động làm full-page `content_hash` thay đổi giữa các lần tải; cần canonical content hash để deduplicate theo nội dung bài chính.
+- **Việc tiếp theo:** Review API Gemini và canonicalize HTML trước khi tính semantic content hash.
+
+---
+
+## TASK-20260722-012 — 2026-07-22T14:38:00Z — Gemini / 3.1 Pro (High)
+
+- **Trạng thái:** DONE
+- **Mục tiêu:** Mở rộng FastAPI bằng endpoint liệt kê và lọc `OpportunityRecord`, dùng repository được inject để sau này dễ đổi sang database thật (như PostgreSQL) mà không phải thay đổi route.
+- **Đã thay đổi:** `backend/repository.py`, `backend/main.py`, `tests/unit/test_api.py`, `coordination/BOARD.md`, `coordination/HANDOFFS.md`.
+- **Hành vi/API/schema:**
+  - Thêm `OpportunityRepository` Protocol và `InMemoryOpportunityRepository` vào `backend/repository.py`.
+  - Cập nhật `backend/main.py` thêm GET `/opportunities` hỗ trợ filter (`opportunity_type`, `experience_level`, `location_type`) và GET `/opportunities/{content_hash}` trả về bản ghi tương ứng hoặc lỗi 404. Repository được lấy bằng FastAPI Depends.
+- **Kiểm tra:** Tạo 7 API unit tests trong `tests/unit/test_api.py` sử dụng dependency overrides; `ruff`, `mypy`, `pytest` kiểm tra thành công.
+- **Blocker/rủi ro:** InMemory implementation không persistent data, dữ liệu sẽ mất khi restart server. Sẽ cần thay thế repo sang database backend ở các bước sau.
+- **Việc tiếp theo:** Tạo Data repository cho PostgreSQL hoặc integration DB.
+
+---
+
 ## TASK-20260722-010 — 2026-07-22T14:34:14Z — Codex / GPT-5
 
 - **Trạng thái:** DONE

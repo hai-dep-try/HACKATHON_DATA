@@ -4,6 +4,9 @@
 
 | ID | Status | Owner | Updated (UTC) | Scope / files | Depends on | Summary |
 |---|---|---|---|---|---|---|
+| TASK-20260722-013 | DONE | Codex / GPT-5 | 2026-07-22T14:38:42Z | `backend/**`, `tests/unit/test_api.py`, `coordination/**` | TASK-20260722-012 | Review và tích hợp API Gemini |
+| TASK-20260722-012 | DONE | Gemini / 3.1 Pro (High) | 2026-07-22T14:38:00Z | `backend/**`, `tests/unit/test_api.py`, `coordination/BOARD.md`, `coordination/HANDOFFS.md` | TASK-20260722-010 | API liệt kê/lọc opportunity với repository injectable; xem `coordination/GEMINI_TASK_012.md` |
+| TASK-20260722-011 | DONE | Codex / GPT-5 | 2026-07-22T14:37:41Z | `agents/pipeline/**`, `scripts/run_pipeline.py`, `tests/unit/test_pipeline.py`, `agents/extractor/core.py`, `tests/unit/test_extractor.py`, `README.md`, `coordination/**` | TASK-20260722-010 | Ghép fetch → raw snapshot → deterministic extract thành pipeline runner |
 | TASK-20260722-010 | DONE | Codex / GPT-5 | 2026-07-22T14:34:14Z | `agents/extractor/**`, `tests/unit/test_extractor.py`, `coordination/**` | TASK-20260722-008 | Review và tích hợp extractor Gemini theo nguyên tắc evidence-only |
 | TASK-20260722-009 | DONE | Codex / GPT-5 | 2026-07-22T14:29:27Z | `agents/scraper/raw_store.py`, `agents/scraper/__init__.py`, `tests/unit/test_raw_store.py`, `README.md`, `coordination/**` | TASK-20260722-006 | Lưu raw snapshot theo content hash, idempotent và có thể load lại |
 | TASK-20260722-008 | DONE | Gemini / 3.1 Pro (Low) | 2026-07-22T14:32:00Z | `agents/extractor/**`, `tests/unit/test_extractor.py`, `agents/prompts/**`, `coordination/BOARD.md`, `coordination/HANDOFFS.md` | TASK-20260722-006 | Parse deadline, technologies, eligibility và compensation; xem `coordination/GEMINI_TASK_008.md` |
